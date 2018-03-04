@@ -1,77 +1,36 @@
-Symfony Standard Edition
+BP Video test
 ========================
 
-**WARNING**: This distribution does not support Symfony 4. See the
-[Installing & Setting up the Symfony Framework][15] page to find a replacement
-that fits you best.
+This is a working app prototype fetching videos from provided YouTube channel(s).
 
-Welcome to the Symfony Standard Edition - a fully-functional Symfony
-application that you can use as the skeleton for your new applications.
+It is built on Symfony 3.4 framework and relies on it's command line interface.
 
-For details on how to download and get started with Symfony, see the
-[Installation][1] chapter of the Symfony Documentation.
+Project utilises `google/apiclient` dependency for communication with Google's API.
 
-What's inside?
---------------
+## Instalation
+- Clone the project
+- Run `composer install` in it's root directory
+- Run `mysql -e "source schema.sql"` (assuming you have root access to the MySQL; if not, ammend the command with the correct user credentials)
 
-The Symfony Standard Edition is configured with the following defaults:
+## Usage
+Videos are fetched running the following command:
 
-  * An AppBundle you can use to start coding;
+`php bin/console fetch:videos {CHANNEL_ID}`, e.g.:
 
-  * Twig as the only configured template engine;
+`php bin/console fetch:videos UCnciA_RZVjq9DMvx1KB625Q`
 
-  * Doctrine ORM/DBAL;
+You can also provide multiple channel IDs separated with comma, without the space:
 
-  * Swiftmailer;
+`php bin/console fetch:videos UCnciA_RZVjq9DMvx1KB625Q,UCydKucK3zAWRuHKbB4nJjtw`
 
-  * Annotations enabled for everything.
+The idea is to have a **cron job** for each channel or a set of channels to run at the different times.
+Crontab examples fetching videos from 2 different channels 4 times an hour at the different times:
 
-It comes pre-configured with the following bundles:
+- `0,15,30,45 * * * * apache php /pathtoproject/bin/console fetch:videos UCnciA_RZVjq9DMvx1KB625Q` 
+- `2,17,32,47 * * * * apache php /pathtoproject/bin/console fetch:videos UCydKucK3zAWRuHKbB4nJjtw`
 
-  * **FrameworkBundle** - The core Symfony framework bundle
-
-  * [**SensioFrameworkExtraBundle**][6] - Adds several enhancements, including
-    template and routing annotation capability
-
-  * [**DoctrineBundle**][7] - Adds support for the Doctrine ORM
-
-  * [**TwigBundle**][8] - Adds support for the Twig templating engine
-
-  * [**SecurityBundle**][9] - Adds security by integrating Symfony's security
-    component
-
-  * [**SwiftmailerBundle**][10] - Adds support for Swiftmailer, a library for
-    sending emails
-
-  * [**MonologBundle**][11] - Adds support for Monolog, a logging library
-
-  * **WebProfilerBundle** (in dev/test env) - Adds profiling functionality and
-    the web debug toolbar
-
-  * **SensioDistributionBundle** (in dev/test env) - Adds functionality for
-    configuring and working with Symfony distributions
-
-  * [**SensioGeneratorBundle**][13] (in dev env) - Adds code generation
-    capabilities
-
-  * [**WebServerBundle**][14] (in dev env) - Adds commands for running applications
-    using the PHP built-in web server
-
-  * **DebugBundle** (in dev/test env) - Adds Debug and VarDumper component
-    integration
-
-All libraries and bundles included in the Symfony Standard Edition are
-released under the MIT or BSD license.
-
-Enjoy!
-
-[1]:  https://symfony.com/doc/3.4/setup.html
-[6]:  https://symfony.com/doc/current/bundles/SensioFrameworkExtraBundle/index.html
-[7]:  https://symfony.com/doc/3.4/doctrine.html
-[8]:  https://symfony.com/doc/3.4/templating.html
-[9]:  https://symfony.com/doc/3.4/security.html
-[10]: https://symfony.com/doc/3.4/email.html
-[11]: https://symfony.com/doc/3.4/logging.html
-[13]: https://symfony.com/doc/current/bundles/SensioGeneratorBundle/index.html
-[14]: https://symfony.com/doc/current/setup/built_in_web_server.html
-[15]: https://symfony.com/doc/current/setup.html
+ 
+@todo - should the number of channels become very long, this approach may not be scalable enough and the channel IDs would need to be stored
+ the the database.
+ 
+@todo - use foreign keys in schema where possible.
