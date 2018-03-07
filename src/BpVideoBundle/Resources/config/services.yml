@@ -1,0 +1,17 @@
+parameters:
+  google_api_key: AIzaSyDUU29dy_PAcN3Q7RDJh8kWrOY3pxa2d9A
+
+services:
+    bp_video.youtube_wrapper:
+        class: BpVideoBundle\Services\GoogleServiceYouTubeWrapper
+        arguments: ['%google_api_key%']
+
+    bp_video.model_video:
+        class: BpVideoBundle\Model\VideoModel
+        arguments: ['%database_host%', '%database_name%', '%database_user%', '%database_password%']
+
+    bp_video.fetch_command:
+        class: BpVideoBundle\Command\YoutubeFetchCommand
+        arguments: ['@bp_video.youtube_wrapper', '@bp_video.model_video']
+        tags:
+              - { name: console.command }

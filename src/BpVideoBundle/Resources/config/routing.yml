@@ -1,0 +1,3 @@
+bp_video_dash:
+    path:     /dashboard
+    defaults: { _controller: BpVideoBundle:Dashboard:index }

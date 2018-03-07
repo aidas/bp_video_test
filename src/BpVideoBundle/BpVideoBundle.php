@@ -1,9 +1,9 @@
 <?php
 
-namespace AppBundle;
+namespace BpVideoBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class AppBundle extends Bundle
+class BpVideoBundle extends Bundle
 {
 }
