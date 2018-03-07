@@ -3,9 +3,13 @@ BP Video test
 
 This is a working app prototype fetching videos from provided YouTube channel(s).
 
-It is built on Symfony 3.4 framework and relies on it's command line interface.
+It is built on Symfony 3.4 PHP framework and relies on it's command line interface.
 
 Project utilises `google/apiclient` dependency for communication with Google's API.
+
+## Requirements
+- A working LAMP box with PHP 5.5.9 or later
+- PHP libcurl package
 
 ## Instalation
 - Clone the project
@@ -19,7 +23,7 @@ Videos are fetched running the following command:
 
 `php bin/console fetch:videos UCnciA_RZVjq9DMvx1KB625Q`
 
-You can also provide multiple channel IDs separated with comma, without the space:
+You can also provide multiple channel IDs separated by comma, without the space:
 
 `php bin/console fetch:videos UCnciA_RZVjq9DMvx1KB625Q,UCydKucK3zAWRuHKbB4nJjtw`
 
