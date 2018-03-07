@@ -34,7 +34,6 @@ Crontab examples fetching videos from 2 different channels 4 times an hour at th
 - `2,17,32,47 * * * * apache php /pathtoproject/bin/console fetch:videos UCydKucK3zAWRuHKbB4nJjtw`
 
  
-@todo - should the number of channels become very long, this approach may not be scalable enough and the channel IDs would need to be stored
- the the database.
+@todo - should the number of channels become very long, this approach may not be scalable enough and the channel IDs would need to be stored in the database.
  
 @todo - use foreign keys in schema where possible.
