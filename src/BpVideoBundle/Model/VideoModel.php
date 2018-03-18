@@ -35,8 +35,11 @@ class VideoModel
     public function __construct($dbHost, $dbName, $dbUser, $dbPswd)
     {
         if (!($this->pdo instanceof PDO)) {
-            $this->pdo = new PDO('mysql:host='.$dbHost.';dbname='.$dbName,
-              $dbUser, $dbPswd);
+            $this->pdo = new PDO(
+              'mysql:host='.$dbHost.';dbname='.$dbName,
+              $dbUser,
+              $dbPswd
+            );
             $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
         }
@@ -51,17 +54,16 @@ class VideoModel
      */
     public function findById($id)
     {
-        $stmt = $this->pdo->prepare('SELECT id FROM videos WHERE id = :id LIMIT 1');
-        $stmt->execute([
-          ':id' => $id,
-        ]);
+        $stmt = $this->pdo->prepare(
+          'SELECT id FROM videos WHERE id = :id LIMIT 1'
+        );
+        $stmt->execute([':id' => $id]);
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     /**
-     * Main method to record video data. It determines if an update
-     * or new insert is required, following by recording stats and tag data.
+     * Main method to record video data
      *
      * @param \Google_Service_YouTube_Video $video
      *
@@ -69,20 +71,17 @@ class VideoModel
      */
     public function persistVideo(\Google_Service_YouTube_Video $video)
     {
-        $result = $this->findById($video['id']);
-
-        if (!empty($result['id'])) {
-            //do an update
-            $stmt = $this->pdo->prepare('UPDATE videos SET
-                    channel_id = :channel_id,
-                    published_at = :published_at,
-                    title = :title,
-                    description = :description
-                    WHERE id = :id LIMIT 1');
-        } else {
-            //do an insert
-            $stmt = $this->pdo->prepare('INSERT INTO videos (id, channel_id, published_at, title, description) VALUES (:id, :channel_id, :published_at, :title, :description)');
-        }
+        $stmt = $this->pdo->prepare(
+          '
+            INSERT INTO videos (id, channel_id, published_at, title, description)
+            VALUES (:id, :channel_id, :published_at, :title, :description)
+            ON DUPLICATE KEY UPDATE
+            channel_id = VALUES(channel_id),
+            published_at = VALUES(published_at),
+            title = VALUES(title),
+            description = VALUES(description)
+        '
+        );
 
         $updateBase = $stmt->execute(
           [
@@ -122,7 +121,9 @@ class VideoModel
       $videoID
     ) {
         $scrapeTimestamp = time();
-        $stmt = $this->pdo->prepare('INSERT INTO video_stats (video_id, scrape_timestamp, comment_count, dislike_count, like_count, view_count) VALUES (:video_id, :scrape_timestamp, :comment_count, :dislike_count, :like_count, :view_count)');
+        $stmt = $this->pdo->prepare(
+          'INSERT INTO video_stats (video_id, scrape_timestamp, comment_count, dislike_count, like_count, view_count) VALUES (:video_id, :scrape_timestamp, :comment_count, :dislike_count, :like_count, :view_count)'
+        );
 
         return $stmt->execute(
           [
@@ -145,13 +146,11 @@ class VideoModel
      */
     public function getTagByName($name)
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM video_tags WHERE tag = :name LIMIT 1');
-
-        $stmt->execute(
-          [
-            ':name' => $name,
-          ]
+        $stmt = $this->pdo->prepare(
+          'SELECT * FROM video_tags WHERE tag = :name LIMIT 1'
         );
+
+        $stmt->execute([':name' => $name,]);
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
@@ -175,29 +174,81 @@ class VideoModel
             }
 
             //if the tag is not found, record it!
-            $stmt = $this->pdo->prepare('INSERT INTO video_tags (tag) VALUES (:tag)');
-
-            $stmt->execute(
-              [
-                ':tag' => trim(strip_tags($tag)),
-              ]
+            $stmt = $this->pdo->prepare(
+              'INSERT INTO video_tags (tag) VALUES (:tag)'
             );
+
+            $stmt->execute([':tag' => trim(strip_tags($tag)),]);
 
             $tagIDs[] = $this->pdo->lastInsertId();
         }
 
         //now that we have tag IDs, we need to update the connections.
-        $stmt = $this->pdo->prepare('DELETE FROM video_tag_conn WHERE video_id = :video_id;');
+        $stmt = $this->pdo->prepare(
+          'DELETE FROM video_tag_conn WHERE video_id = :video_id;'
+        );
         if ($stmt->execute([':video_id' => $videoID])) {
             foreach (array_unique($tagIDs) as $tagID) {
-                $stmt = $this->pdo->prepare('INSERT INTO video_tag_conn VALUES (:video_id, :tag_id);');
-                $stmt->execute(
-                  [
-                    ':video_id' => $videoID,
-                    ':tag_id' => $tagID,
-                  ]
+                $stmt = $this->pdo->prepare(
+                  'INSERT INTO video_tag_conn VALUES (:video_id, :tag_id);'
                 );
+                $stmt->execute([':video_id' => $videoID, ':tag_id' => $tagID]);
             }
         }
     }
+
+    /**
+     * Filters video by tags
+     *
+     * @param string $tagName
+     * @param int $limit
+     * @param int $offset
+     *
+     * @return array
+     */
+    public function retrieveVideosByTag($tagName, $limit = 25, $offset = 0)
+    {
+
+        $stmt = $this->pdo->prepare('
+            SELECT vids.* FROM videos vids
+            JOIN video_tag_conn conn ON vids.id=conn.video_id
+            WHERE conn.tag_id IN (SELECT id FROM video_tags WHERE tag = :tag)
+            LIMIT :limit OFFSET :offset
+        ');
+
+        $stmt->execute(
+          [':tag' => $tagName, ':limit' => $limit * 1, ':offset' => $offset * 1]
+        );
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Gets the number of 1st hour views on all videos
+     * @param int|string $time
+     *
+     * @return array
+     */
+    public function getViewsInTimeframe($time)
+    {
+        $stmt = $this->pdo->prepare(
+          '
+            SELECT vid.id, stats.view_count FROM videos vid
+            INNER JOIN (
+            SELECT a.* FROM video_stats a
+            INNER JOIN
+            (SELECT video_id, MAX(scrape_timestamp) last_scrape
+             FROM video_stats GROUP BY video_id
+             HAVING last_scrape <= (SELECT UNIX_TIMESTAMP(published_at)+'.$time * 1 .' FROM videos WHERE id=video_stats.video_id)
+             ) b
+             ON a.video_id=b.video_id AND a.scrape_timestamp=b.last_scrape
+            ) stats ON vid.id=stats.video_id
+        '
+        );
+
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
 }
