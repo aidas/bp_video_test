@@ -1,3 +1,7 @@
 bp_video_dash:
     path:     /dashboard/{tag}/{page}
-    defaults: { _controller: BpVideoBundle:Dashboard:index, page: 1 }
+    defaults: { _controller: BpVideoBundle:Dashboard:index, tag: null, page: 1 }
+
+bp_video_tag_suggestions:
+    path:     /ajax/tag-suggestions/{name}
+    defaults: { _controller: BpVideoBundle:Ajax:tagSuggetions }

@@ -1,3 +1,59 @@
-{% if videosByTag is not empty %}
-    {{ dump(videosByTag) }}
-{% endif %}
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="ui-widget">
+        <label for="tags">Search for tags: </label>
+        <input id="tags">
+    </div>
+
+    {% if videosByTag is not empty %}
+        {% for video in videosByTag %}
+            {{ dump (video) }}
+        {% endfor %}
+    {% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <style type="text/css">
+        .ui-autocomplete {
+            position: absolute;
+            cursor: default;
+            z-index: 1001 !important
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <script>
+        $(function () {
+            function log(message) {
+                $("<div>").text(message).prependTo("#log");
+                $("#log").scrollTop(0);
+            }
+
+            $("#tags").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/ajax/tag-suggestions/" + request.term,
+                        dataType: "json",
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return {
+                                    value: item.tag
+                                };
+                            }));
+                        }
+                    });
+                },
+                minLength: 2,
+                select: function (event, ui) {
+                    window.location.href = '/dashboard/' + ui.item.value;
+                }
+            });
+        });
+    </script>
+{% endblock %}
