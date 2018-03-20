@@ -168,6 +168,9 @@ class YoutubeFetchCommand extends Command
 
             $i = 0;
             foreach ($this->getVideoData($channelVids) as $videoResult) {
+                if (!$this->validateVideoData($videoResult)) {
+                    continue;
+                }
                 if ($this->videoModel->persistVideo($videoResult)) {
                     $i++;
                 }
@@ -175,5 +178,44 @@ class YoutubeFetchCommand extends Command
 
             $output->writeln($i.' videos have been updated');
         }
+    }
+
+    /**
+     * Very very basic raw video data validation
+     *
+     * @param array $video
+     * @return bool
+     *
+     * @todo make it better!!!
+     */
+    private function validateVideoData($video) {
+        if (empty($video['id'])) {
+            error_log ('Video ID is missing');
+            return false;
+        }
+
+        if (empty($video['snippet'])) {
+            error_log ('Snippet data is missing for video ' . $video['id']);
+            return false;
+        }
+
+        if (empty($video['snippet']['channelId'])) {
+            error_log ('Channel ID is missing for video ' . $video['id']);
+            return false;
+        }
+
+        if (empty($video['snippet']['publishedAt'])) {
+            error_log ('publishedAt date is missing for video' . $video['id']);
+            return false;
+        }
+
+        try {
+            $t = new \DateTime($video['snippet']['publishedAt']);
+        } catch (\Exception $e) {
+            error_log('Error while processing video ' . $video['id'] . ' - publish date validation failed');
+            return false;
+        }
+
+        return true;
     }
 }
