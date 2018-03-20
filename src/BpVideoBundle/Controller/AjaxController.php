@@ -24,6 +24,8 @@ class AjaxController extends Controller {
      * @param string $name
      *
      * @return \Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     *
+     * @todo - definitely implement caching of the result returned my model
      */
     function tagSuggetionsAction(Request $request, $name)
     {

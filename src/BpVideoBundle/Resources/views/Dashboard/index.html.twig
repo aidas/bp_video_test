@@ -1,6 +1,21 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
+
+    {% if firstHourViewsDividedByChannels is not empty %}
+        <div>
+            First hour views divided by channels: {{ firstHourViewsDividedByChannels }}
+        </div>
+        <hr/>
+    {% endif %}
+
+    {% if allVideoMedian is not empty %}
+        <div>
+            All videos first hour views median: {{ allVideoMedian }}
+        </div>
+        <hr/>
+    {% endif %}
+
     <div class="ui-widget">
         <label for="tags">Search for tags: </label>
         <input id="tags">
@@ -8,11 +23,11 @@
 
     {% if videosByTag is not empty %}
         <ul id="video-list">
-        {% for video in videosByTag %}
-            <li>
-                {{ dump (video) }}
-            </li>
-        {% endfor %}
+            {% for video in videosByTag %}
+                <li>
+                    {{ dump (video) }}
+                </li>
+            {% endfor %}
         </ul>
     {% endif %}
 {% endblock %}
