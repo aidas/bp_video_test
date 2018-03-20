@@ -11,7 +11,7 @@ use PDO;
  *
  * @package BpVideoBundle\Model
  *
- * @todo: implement methods for data retrieval for the dashboard
+ * @todo: implement better data validation where neccessary
  * @todo: consider handling case sensitive tag names?
  * @todo: delete the videos that are no longer in the channel
  * @todo: use transactions where applicable

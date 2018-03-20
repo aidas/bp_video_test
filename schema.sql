@@ -6,10 +6,10 @@ USE bored_panda;
 
 CREATE TABLE IF NOT EXISTS `videos` (
   `id` varchar(255) NOT NULL,
-  `channel_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `channel_id` varchar(255) NOT NULL,
   `published_at` int(11) NOT NULL,
-  `title` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
-  `description` mediumtext CHARACTER SET latin1,
+  `title` varchar(255) DEFAULT NULL,
+  `description` mediumtext,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
