@@ -7,19 +7,27 @@
     </div>
 
     {% if videosByTag is not empty %}
+        <ul id="video-list">
         {% for video in videosByTag %}
-            {{ dump (video) }}
+            <li>
+                {{ dump (video) }}
+            </li>
         {% endfor %}
+        </ul>
     {% endif %}
 {% endblock %}
 
 {% block stylesheets %}
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <style type="text/css">
+        #video-list {
+            z-index: 1 !important
+        }
+
         .ui-autocomplete {
             position: absolute;
             cursor: default;
-            z-index: 1001 !important
+            z-index: 999999 !important
         }
     </style>
 {% endblock %}
@@ -30,11 +38,6 @@
 
     <script>
         $(function () {
-            function log(message) {
-                $("<div>").text(message).prependTo("#log");
-                $("#log").scrollTop(0);
-            }
-
             $("#tags").autocomplete({
                 source: function (request, response) {
                     $.ajax({
