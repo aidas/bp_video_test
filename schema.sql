@@ -7,7 +7,7 @@ USE bored_panda;
 CREATE TABLE IF NOT EXISTS `videos` (
   `id` varchar(255) NOT NULL,
   `channel_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `published_at` datetime NOT NULL,
+  `published_at` int(11) NOT NULL,
   `title` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `description` mediumtext CHARACTER SET latin1,
   PRIMARY KEY (`id`)
@@ -22,15 +22,16 @@ CREATE TABLE IF NOT EXISTS `video_stats` (
   `like_count` int(10) unsigned NOT NULL DEFAULT '0',
   `view_count` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `video_id_idx` (`video_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=397 DEFAULT CHARSET=utf8;
+  KEY `video_id_idx` (`video_id`),
+  CONSTRAINT `video_id_stats` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `video_tags` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `tag` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=940 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `video_tag_conn` (
   `video_id` varchar(255) NOT NULL,
